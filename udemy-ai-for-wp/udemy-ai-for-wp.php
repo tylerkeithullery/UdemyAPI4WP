@@ -1,6 +1,6 @@
 <?php
 /*
-Plugin Name: Udemy API for Wordpress
+Plugin Name: Udemy API for WP
 Plugin URI: https://github.com/tylerkeithullery/udemyapiwp
 Description: A plugin to fetch and display Udemy course information from API.
 Version: 1.0
