@@ -4,7 +4,9 @@ function uci_debug_page() {
         return;
     }
 
-    check_admin_referer('uci_debug_nonce');
+    if (isset($_POST['uci_debug_nonce']) && !wp_verify_nonce($_POST['uci_debug_nonce'], 'uci_debug_nonce')) {
+        return;
+    }
 
     global $wpdb;
     $courses_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}udemy_courses");
@@ -21,7 +23,7 @@ function uci_debug_page() {
     ?>
     <div class="wrap">
         <h1>Debug Information</h1>
-        <p>When reporting a bug or issue on GitHub (<a href="https://github.com/tylerkeithullery/UdemyAPI4WP/issues" target="_blank">https://github.com/tylerkeithullery/UdemyAPI4WP/issues</a>) please copy all this information into the report.</p>
+        <p>When reporting a bug or issue on (<a href="https://github.com/tylerkeithullery/UdemyAPI4WP/issues" target="_blank">GitHub</a>) please copy all this information into the report.</p>
         <form method="post">
             <?php wp_nonce_field('uci_debug_nonce'); ?>
             <textarea readonly rows="20" cols="100"><?php
