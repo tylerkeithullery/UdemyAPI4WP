@@ -102,6 +102,9 @@ function uci_admin_page() {
         <form method="post" action="" id="uci-export-form">
             <input type="submit" name="update_table" value="Update Table" class="button button-primary"/>
             <input type="button" id="uci-export-button" value="Export Table" class="button button-secondary"/>
+            <span id="api-quota-counter" title="Udemy API quota: 100 requests per 10 seconds. Requests beyond this will return 429's until the rate falls below the throttle threshold.">
+                API Quota: <strong>100</strong> requests remaining
+            </span>
         </form>
         <h2>Courses <em>(Last Updated: <?php echo esc_html($last_updated); ?>)</em></h2>
         <style>
@@ -114,6 +117,16 @@ function uci_admin_page() {
             }
             .widefat tr:nth-child(even) {
                 background-color: #f1f1f1;
+            }
+            #api-quota-counter {
+                margin-left: 20px;
+                cursor: help;
+            }
+            #api-quota-counter.good {
+                color: green;
+            }
+            #api-quota-counter.low {
+                color: red;
             }
         </style>
         <table class="widefat fixed" cellspacing="0">
@@ -171,6 +184,17 @@ function uci_admin_page() {
         document.getElementById('uci-export-button').addEventListener('click', function() {
             window.location.href = '<?php echo admin_url('admin.php?page=udemy-course-info-export'); ?>';
         });
+
+        // Example quota value, replace with actual value from API response
+        var remainingRequests = 100; // This should be dynamically set based on actual API response
+        var quotaCounter = document.getElementById('api-quota-counter');
+        var quotaThreshold = 20; // Threshold for low quota
+
+        if (remainingRequests <= quotaThreshold) {
+            quotaCounter.classList.add('low');
+        } else {
+            quotaCounter.classList.add('good');
+        }
     </script>
     <?php
 }
