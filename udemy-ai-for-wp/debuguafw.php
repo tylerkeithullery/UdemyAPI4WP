@@ -23,10 +23,10 @@ function uci_debug_page() {
     ?>
     <div class="wrap">
         <h1>Debug Information</h1>
-        <p>When reporting a bug or issue on (<a href="https://github.com/tylerkeithullery/UdemyAPI4WP/issues" target="_blank">GitHub</a>) please copy all this information into the report.</p>
+        <p>When reporting a bug or issue on <a href="https://github.com/tylerkeithullery/UdemyAPI4WP/issues" target="_blank">GitHub</a> please copy all this information into the report.</p>
         <form method="post">
             <?php wp_nonce_field('uci_debug_nonce'); ?>
-            <textarea readonly rows="20" cols="100"><?php
+            <textarea id="debug-info" readonly rows="20" cols="100"><?php
             echo "Plugin Version: 1.0\n";
             echo "WordPress Version: " . esc_html(get_bloginfo('version')) . "\n";
             echo "PHP Version: " . esc_html(phpversion()) . "\n";
@@ -45,8 +45,19 @@ function uci_debug_page() {
             echo "Server Information: " . esc_html($server_info) . "\n";
             ?>
             </textarea>
+            <br>
+            <button type="button" onclick="copyDebugInfo()">Copy</button>
         </form>
     </div>
+    <script type="text/javascript">
+        function copyDebugInfo() {
+            var copyText = document.getElementById("debug-info");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999); // For mobile devices
+            document.execCommand("copy");
+            alert("Debug content copied to clipboard");
+        }
+    </script>
     <?php
 }
 ?>
