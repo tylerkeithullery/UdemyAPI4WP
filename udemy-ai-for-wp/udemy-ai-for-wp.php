@@ -97,8 +97,12 @@ function uci_admin_page() {
         <h1>Udemy Course Info</h1>
         <form method="post" action="" id="uci-export-form">
             <input type="submit" name="update_table" value="Update Table" class="button button-primary"/>
-            <input type="button" id="uci-export-button" value="Export Table" class="button button-secondary"/>
-            <input type="hidden" name="export_format" id="uci-export-format" value=""/>
+            <select id="uci-export-format" name="export_format">
+                <option value="csv">CSV</option>
+                <option value="json">JSON</option>
+                <option value="xml">XML</option>
+            </select>
+            <input type="submit" name="export_table" value="Export Table" class="button button-secondary"/>
         </form>
         <h2>Courses <em>(Last Updated: <?php echo esc_html($last_updated); ?>)</em></h2>
         <style>
@@ -166,9 +170,8 @@ function uci_admin_page() {
     </div>
     <script>
         document.getElementById('uci-export-button').addEventListener('click', function() {
-            var format = prompt('Enter export format (csv, json, xml):');
+            var format = document.getElementById('uci-export-format').value;
             if (format) {
-                document.getElementById('uci-export-format').value = format;
                 document.getElementById('uci-export-form').submit();
             }
         });
