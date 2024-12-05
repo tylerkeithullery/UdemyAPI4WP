@@ -231,6 +231,7 @@ function uci_update_table() {
                 ));
             }
 
+            update_option('udemy_manual_update', $current_time);
             echo '<div class="notice notice-success"><p>Table updated successfully.</p></div>';
         } else {
             echo '<div class="notice notice-warning"><p>No courses found in the Udemy API response.</p></div>';
