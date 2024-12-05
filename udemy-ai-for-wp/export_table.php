@@ -5,6 +5,7 @@ function uci_export_page() {
     <div class="wrap">
         <h1>Export Udemy Courses</h1>
         <form method="post" action="" id="export-form">
+            <?php wp_nonce_field('uci_export_nonce', 'uci_export_nonce_field'); ?>
             <h2>Select Export Format</h2>
             <select name="export_format">
                 <option value="csv">CSV</option>
@@ -37,13 +38,34 @@ function uci_export_page() {
         </form>
     </div>
     <script type="text/javascript">
-        document.getElementById('export-form').addEventListener('submit', function() {
+        document.getElementById('export-form').addEventListener('submit', function(event) {
+            event.preventDefault();
             document.getElementById('loading-indicator').style.display = 'block';
+            
+            var formData = new FormData(this);
+            fetch('', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('loading-indicator').style.display = 'none';
+                document.querySelector('.wrap').insertAdjacentHTML('beforeend', data);
+            })
+            .catch(error => {
+                document.getElementById('loading-indicator').style.display = 'none';
+                document.querySelector('.wrap').insertAdjacentHTML('beforeend', '<div class="notice notice-error"><p>An error occurred during export. Please try again.</p></div>');
+            });
         });
     </script>
     <?php
     // Handle form submission
     if (isset($_POST['export_table'])) {
+        if (!isset($_POST['uci_export_nonce_field']) || !wp_verify_nonce($_POST['uci_export_nonce_field'], 'uci_export_nonce')) {
+            echo '<div class="notice notice-error"><p>Nonce verification failed. Please try again.</p></div>';
+            return;
+        }
+
         $format = sanitize_text_field($_POST['export_format']);
         $selected_columns = isset($_POST['columns']) ? array_map('sanitize_text_field', $_POST['columns']) : array();
 
