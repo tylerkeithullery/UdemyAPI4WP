@@ -68,7 +68,7 @@ function uci_export_page() {
             })
             .catch(error => {
                 document.getElementById('loading-indicator').style.display = 'none';
-                document.querySelector('.wrap').insertAdjacentHTML('beforeend', '<div class="notice notice-error"><p>An error occurred during export. Please try again.</p></div>');
+                document.querySelector('.wrap').insertAdjacentHTML('beforeend', `<div class="notice notice-error"><p>An error occurred during export: ${error.message}</p></div>`);
             });
         });
     </script>
@@ -166,6 +166,6 @@ function uci_export_data() {
     } catch (Exception $e) {
         // Log the error and display a message to the user
         error_log('Export error: ' . $e->getMessage());
-        wp_send_json_error('An error occurred during export. Please check the error log for details.');
+        wp_send_json_error('An error occurred during export: ' . $e->getMessage());
     }
 }
