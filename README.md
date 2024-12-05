@@ -12,6 +12,9 @@ The Udemy API for WordPress plugin allows you to fetch and display Udemy course 
 - Generate CSV files of course data.
 - Securely store and manage your Udemy API secret token.
 
+![image](https://skillxpand.com/wp-content/uploads/2024/12/Screenshot-2024-12-04-5.23.00-PM.png)
+
+
 ## Installation
 
 1. Download the plugin files and upload them to the `/wp-content/plugins/` directory, or install the plugin through the WordPress plugins screen directly.
