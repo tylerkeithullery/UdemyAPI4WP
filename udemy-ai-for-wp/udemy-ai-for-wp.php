@@ -18,6 +18,7 @@ function uci_create_table() {
     $table_name = $wpdb->prefix . 'udemy_courses';
     $charset_collate = $wpdb->get_charset_collate();
 
+    // SQL query to create the custom table
     $sql = "CREATE TABLE $table_name (
         id mediumint(9) NOT NULL AUTO_INCREMENT,
         course_id varchar(255) NOT NULL,
@@ -61,7 +62,9 @@ add_action('uci_update_courses_event', 'uci_update_table');
 add_action('admin_menu', 'uci_admin_menu');
 
 function uci_admin_menu() {
+    // Add main menu page
     add_menu_page('Udemy Course Info', 'Udemy Course Info', 'manage_options', 'udemy-course-info', 'uci_admin_page');
+    // Add submenu pages
     add_submenu_page('udemy-course-info', 'Setup', 'Setup', 'manage_options', 'udemy-course-info-setup', 'uci_setup_page');
     add_submenu_page('udemy-course-info', 'Export', 'Export', 'manage_options', 'udemy-course-info-export', 'uci_export_page');
 }
@@ -70,11 +73,13 @@ function uci_admin_menu() {
 function uci_admin_page() {
     $secret_token = get_option('udemy_secret_token', '');
 
+    // Redirect to setup page if secret token is not set
     if (empty($secret_token)) {
         wp_redirect(admin_url('admin.php?page=udemy-course-info-setup&redirected=true'));
         exit;
     }
 
+    // Handle form submissions
     if (isset($_POST['update_table'])) {
         uci_update_table();
     }
@@ -172,6 +177,7 @@ function uci_admin_page() {
     <?php
 }
 
+// Function to update the table with data from Udemy API
 function uci_update_table() {
     $api_url = 'https://www.udemy.com/instructor-api/v1/taught-courses/courses?fields[course]=id,title,headline,is_paid,is_published,num_reviews,published_time,published_title,rating,url,created';
     $secret_token = get_option('udemy_secret_token', '');
@@ -260,6 +266,7 @@ function uci_update_table() {
     }
 }
 
+// Function to handle table export
 function uci_export_table() {
     if (isset($_POST['export_format']) && $_POST['export_format'] === 'json') {
         uci_generate_json();
@@ -270,6 +277,7 @@ function uci_export_table() {
     }
 }
 
+// Function to generate CSV export
 function uci_generate_csv() {
     global $wpdb;
     $table_name = $wpdb->prefix . 'udemy_courses';
@@ -294,6 +302,7 @@ function uci_generate_csv() {
     exit;
 }
 
+// Function to generate JSON export
 function uci_generate_json() {
     global $wpdb;
     $table_name = $wpdb->prefix . 'udemy_courses';
@@ -311,6 +320,7 @@ function uci_generate_json() {
     exit;
 }
 
+// Function to generate XML export
 function uci_generate_xml() {
     global $wpdb;
     $table_name = $wpdb->prefix . 'udemy_courses';
