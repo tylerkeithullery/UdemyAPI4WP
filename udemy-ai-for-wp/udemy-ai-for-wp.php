@@ -67,6 +67,7 @@ function uci_admin_menu() {
     // Add submenu pages
     add_submenu_page('udemy-course-info', 'Setup', 'Setup', 'manage_options', 'udemy-course-info-setup', 'uci_setup_page');
     add_submenu_page('udemy-course-info', 'Export', 'Export', 'manage_options', 'udemy-course-info-export', 'uci_export_page');
+    add_submenu_page('udemy-course-info', 'Debug', 'Debug', 'manage_options', 'udemy-course-info-debug', 'uci_debug_page');
 }
 
 // Main admin page
@@ -190,6 +191,7 @@ function uci_update_table() {
     ));
 
     if (is_wp_error($response)) {
+        update_option('udemy_last_api_error', $response->get_error_message());
         echo '<div class="notice notice-error"><p>Failed to connect to Udemy API. Please try again later.</p></div>';
         return;
     }
@@ -198,6 +200,7 @@ function uci_update_table() {
     $response_body = wp_remote_retrieve_body($response);
 
     if ($response_code >= 200 && $response_code < 300) {
+        update_option('udemy_last_api_error', 'None');
         $courses = json_decode($response_body, true);
 
         if (!empty($courses['results'])) {
@@ -233,35 +236,36 @@ function uci_update_table() {
             echo '<div class="notice notice-warning"><p>No courses found in the Udemy API response.</p></div>';
         }
     } else {
+        $error_message = 'An unexpected error occurred. Please try again later.';
         switch ($response_code) {
             case 400:
-                echo '<div class="notice notice-error"><p>Bad Request. Please check the API request parameters.</p></div>';
+                $error_message = 'Bad Request. Please check the API request parameters.';
                 break;
             case 401:
-                echo '<div class="notice notice-error"><p>Unauthorized. Please check your API credentials.</p></div>';
+                $error_message = 'Unauthorized. Please check your API credentials.';
                 break;
             case 403:
-                echo '<div class="notice notice-error"><p>Forbidden. You do not have permission to access this resource.</p></div>';
+                $error_message = 'Forbidden. You do not have permission to access this resource.';
                 break;
             case 404:
-                echo '<div class="notice notice-error"><p>Not Found. The requested resource could not be found.</p></div>';
+                $error_message = 'Not Found. The requested resource could not be found.';
                 break;
             case 429:
-                echo '<div class="notice notice-error"><p>Too Many Requests. Please slow down your request rate.</p></div>';
+                $error_message = 'Too Many Requests. Please slow down your request rate.';
                 break;
             case 500:
-                echo '<div class="notice notice-error"><p>Internal Server Error. Please try again later.</p></div>';
+                $error_message = 'Internal Server Error. Please try again later.';
                 break;
             case 503:
-                echo '<div class="notice notice-error"><p>Service Unavailable. The server is currently unable to handle the request. Please try again later.</p></div>';
-                break;
-            default:
-                echo '<div class="notice notice-error"><p>An unexpected error occurred. Please try again later.</p></div>';
+                $error_message = 'Service Unavailable. The server is currently unable to handle the request. Please try again later.';
                 break;
         }
+        update_option('udemy_last_api_error', $error_message);
+        echo '<div class="notice notice-error"><p>' . esc_html($error_message) . '</p></div>';
     }
 }
 
 // Include the setup and export pages
 include plugin_dir_path(__FILE__) . 'setup.php';
 include plugin_dir_path(__FILE__) . 'export_table.php';
+include plugin_dir_path(__FILE__) . 'debuguafw.php';
