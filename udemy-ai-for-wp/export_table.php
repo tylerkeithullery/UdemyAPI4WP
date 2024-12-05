@@ -4,7 +4,7 @@ function uci_export_page() {
     ?>
     <div class="wrap">
         <h1>Export Udemy Courses</h1>
-        <form method="post" action="">
+        <form method="post" action="" id="export-form">
             <h2>Select Export Format</h2>
             <select name="export_format">
                 <option value="csv">CSV</option>
@@ -33,8 +33,14 @@ function uci_export_page() {
             }
             ?>
             <input type="submit" name="export_table" value="Export" class="button button-primary"/>
+            <div id="loading-indicator" style="display:none;">Exporting, please wait...</div>
         </form>
     </div>
+    <script type="text/javascript">
+        document.getElementById('export-form').addEventListener('submit', function() {
+            document.getElementById('loading-indicator').style.display = 'block';
+        });
+    </script>
     <?php
     // Handle form submission
     if (isset($_POST['export_table'])) {
@@ -103,6 +109,7 @@ function uci_export_data($format, $columns) {
                 fclose($output);
                 break;
         }
+        echo '<div class="notice notice-success"><p>Export successful!</p></div>';
     } catch (Exception $e) {
         // Log the error and display a message to the user
         error_log('Export error: ' . $e->getMessage());

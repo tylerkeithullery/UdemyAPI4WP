@@ -23,7 +23,7 @@ function uci_debug_page() {
     ?>
     <div class="wrap">
         <h1>Debug Information</h1>
-        <p>When reporting a bug or issue on <a href="https://github.com/tylerkeithullery/UdemyAPI4WP/issues" target="_blank">GitHub</a> please copy all this information into the report.</p>
+        <p>When reporting a bug or issue on (<a href="https://github.com/tylerkeithullery/UdemyAPI4WP/issues" target="_blank">GitHub</a> please copy all this information into the report.</p>
         <form method="post">
             <?php wp_nonce_field('uci_debug_nonce'); ?>
             <textarea id="debug-info" readonly rows="20" cols="100"><?php
