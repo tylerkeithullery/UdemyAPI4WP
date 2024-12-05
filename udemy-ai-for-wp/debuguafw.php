@@ -1,5 +1,11 @@
 <?php
 function uci_debug_page() {
+    if (!current_user_can('manage_options')) {
+        return;
+    }
+
+    check_admin_referer('uci_debug_nonce');
+
     global $wpdb;
     $courses_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}udemy_courses");
     $last_updated = $wpdb->get_var("SELECT MAX(last_updated) FROM {$wpdb->prefix}udemy_courses");
@@ -15,26 +21,29 @@ function uci_debug_page() {
     ?>
     <div class="wrap">
         <h1>Debug Information</h1>
-        <textarea readonly rows="20" cols="100">
-        <?php
-        echo "Plugin Version: 1.0\n";
-        echo "WordPress Version: " . get_bloginfo('version') . "\n";
-        echo "PHP Version: " . phpversion() . "\n";
-        echo "Number of Courses: $courses_count\n";
-        echo "Last Updated: $last_updated\n";
-        echo "Secret Token Set: " . (!empty($secret_token) ? 'Yes' : 'No') . "\n";
-        echo "Last API Error: $last_api_error\n";
-        echo "Last Row/Table Change: $last_row_change\n";
-        echo "Manual Update: $manual_update\n";
-        echo "Valid Database: $db_valid\n";
-        echo "Active Theme: " . $active_theme->get('Name') . " (Version: " . $active_theme->get('Version') . ")\n";
-        echo "Active Plugins:\n";
-        foreach ($active_plugins as $plugin) {
-            echo "- " . $plugin . "\n";
-        }
-        echo "Server Information: $server_info\n";
-        ?>
-        </textarea>
+        <form method="post">
+            <?php wp_nonce_field('uci_debug_nonce'); ?>
+            <textarea readonly rows="20" cols="100">
+            <?php
+            echo "Plugin Version: 1.0\n";
+            echo "WordPress Version: " . esc_html(get_bloginfo('version')) . "\n";
+            echo "PHP Version: " . esc_html(phpversion()) . "\n";
+            echo "Number of Courses: " . esc_html($courses_count) . "\n";
+            echo "Last Updated: " . esc_html($last_updated) . "\n";
+            echo "Secret Token Set: " . esc_html(!empty($secret_token) ? 'Yes' : 'No') . "\n";
+            echo "Last API Error: " . esc_html($last_api_error) . "\n";
+            echo "Last Row/Table Change: " . esc_html($last_row_change) . "\n";
+            echo "Manual Update: " . esc_html($manual_update) . "\n";
+            echo "Valid Database: " . esc_html($db_valid) . "\n";
+            echo "Active Theme: " . esc_html($active_theme->get('Name')) . " (Version: " . esc_html($active_theme->get('Version')) . ")\n";
+            echo "Active Plugins:\n";
+            foreach ($active_plugins as $plugin) {
+                echo "- " . esc_html($plugin) . "\n";
+            }
+            echo "Server Information: " . esc_html($server_info) . "\n";
+            ?>
+            </textarea>
+        </form>
     </div>
     <?php
 }
