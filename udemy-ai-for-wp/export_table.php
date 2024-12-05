@@ -59,6 +59,10 @@ function uci_export_data($format, $columns) {
     $filename = 'udemy_courses_' . date('Ymd') . '.' . $format;
     header('Content-Disposition: attachment;filename=' . $filename);
 
+    // Clear the output buffer to prevent any extra information from being included
+    ob_clean();
+    flush();
+
     try {
         switch ($format) {
             case 'json':
