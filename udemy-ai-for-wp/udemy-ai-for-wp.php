@@ -84,10 +84,6 @@ function uci_admin_page() {
         uci_update_table();
     }
 
-    if (isset($_POST['export_table'])) {
-        uci_export_table();
-    }
-
     // Fetch data from the database
     global $wpdb;
     $table_name = $wpdb->prefix . 'udemy_courses';
@@ -264,87 +260,6 @@ function uci_update_table() {
                 break;
         }
     }
-}
-
-// Function to handle table export
-function uci_export_table() {
-    if (isset($_POST['export_format']) && $_POST['export_format'] === 'json') {
-        uci_generate_json();
-    } elseif (isset($_POST['export_format']) && $_POST['export_format'] === 'xml') {
-        uci_generate_xml();
-    } else {
-        uci_generate_csv();
-    }
-}
-
-// Function to generate CSV export
-function uci_generate_csv() {
-    global $wpdb;
-    $table_name = $wpdb->prefix . 'udemy_courses';
-    $courses = $wpdb->get_results("SELECT * FROM $table_name", ARRAY_A);
-
-    if (empty($courses)) {
-        return;
-    }
-
-    $filename = 'udemy_courses_' . date('Ymd') . '.csv';
-    header('Content-Type: text/csv');
-    header('Content-Disposition: attachment;filename=' . $filename);
-
-    $output = fopen('php://output', 'w');
-    fputcsv($output, array('Course ID', 'Title', 'Headline', 'Paid', 'Published', 'Reviews', 'Published Time', 'Published Title', 'Rating', 'URL', 'Created'));
-
-    foreach ($courses as $course) {
-        fputcsv($output, $course);
-    }
-
-    fclose($output);
-    exit;
-}
-
-// Function to generate JSON export
-function uci_generate_json() {
-    global $wpdb;
-    $table_name = $wpdb->prefix . 'udemy_courses';
-    $courses = $wpdb->get_results("SELECT * FROM $table_name", ARRAY_A);
-
-    if (empty($courses)) {
-        return;
-    }
-
-    $filename = 'udemy_courses_' . date('Ymd') . '.json';
-    header('Content-Type: application/json');
-    header('Content-Disposition: attachment;filename=' . $filename);
-
-    echo json_encode($courses);
-    exit;
-}
-
-// Function to generate XML export
-function uci_generate_xml() {
-    global $wpdb;
-    $table_name = $wpdb->prefix . 'udemy_courses';
-    $courses = $wpdb->get_results("SELECT * FROM $table_name", ARRAY_A);
-
-    if (empty($courses)) {
-        return;
-    }
-
-    $filename = 'udemy_courses_' . date('Ymd') . '.xml';
-    header('Content-Type: text/xml');
-    header('Content-Disposition: attachment;filename=' . $filename);
-
-    $xml = new SimpleXMLElement('<courses/>');
-
-    foreach ($courses as $course) {
-        $course_xml = $xml->addChild('course');
-        foreach ($course as $key => $value) {
-            $course_xml->addChild($key, htmlspecialchars($value));
-        }
-    }
-
-    echo $xml->asXML();
-    exit;
 }
 
 // Include the setup and export pages
