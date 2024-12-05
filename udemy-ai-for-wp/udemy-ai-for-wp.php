@@ -85,7 +85,11 @@ function uci_admin_page() {
     // Fetch data from the database
     global $wpdb;
     $table_name = $wpdb->prefix . 'udemy_courses';
-    $courses = $wpdb->get_results("SELECT * FROM $table_name");
+
+    $orderby = isset($_GET['orderby']) ? sanitize_text_field($_GET['orderby']) : 'last_updated';
+    $order = isset($_GET['order']) ? sanitize_text_field($_GET['order']) : 'DESC';
+
+    $courses = $wpdb->get_results("SELECT * FROM $table_name ORDER BY $orderby $order");
     $last_updated = $wpdb->get_var("SELECT MAX(last_updated) FROM $table_name");
 
     ?>
@@ -111,17 +115,27 @@ function uci_admin_page() {
         <table class="widefat fixed" cellspacing="0">
             <thead>
                 <tr>
-                    <th>Course ID</th>
-                    <th>Title</th>
-                    <th>Headline</th>
-                    <th>Paid</th>
-                    <th>Published</th>
-                    <th>Reviews</th>
-                    <th>Published Time</th>
-                    <th>Published Title</th>
-                    <th>Rating</th>
-                    <th>URL</th>
-                    <th>Created</th>
+                    <?php
+                    $columns = array(
+                        'course_id' => 'Course ID',
+                        'course_title' => 'Title',
+                        'headline' => 'Headline',
+                        'is_paid' => 'Paid',
+                        'is_published' => 'Published',
+                        'num_reviews' => 'Reviews',
+                        'published_time' => 'Published Time',
+                        'published_title' => 'Published Title',
+                        'rating' => 'Rating',
+                        'url' => 'URL',
+                        'created' => 'Created'
+                    );
+
+                    foreach ($columns as $column => $display_name) {
+                        $sort_order = ($orderby === $column && $order === 'ASC') ? 'DESC' : 'ASC';
+                        $sort_icon = ($orderby === $column) ? ($order === 'ASC' ? '↑' : '↓') : '';
+                        echo "<th><a href='?page=udemy-course-info&orderby=$column&order=$sort_order'>$display_name $sort_icon</a></th>";
+                    }
+                    ?>
                 </tr>
             </thead>
             <tbody>
