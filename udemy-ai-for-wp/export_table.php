@@ -43,7 +43,8 @@ function uci_export_page() {
             document.getElementById('loading-indicator').style.display = 'block';
             
             var formData = new FormData(this);
-            fetch('', {
+            formData.append('action', 'uci_export_data'); // Add action parameter for AJAX request
+            fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
                 method: 'POST',
                 body: formData
             })
@@ -92,17 +93,34 @@ function uci_export_page() {
     }
 }
 
+// Add action to handle the AJAX request
+add_action('wp_ajax_uci_export_data', 'uci_export_data');
+
 // Function to export data in the selected format
-function uci_export_data($format, $columns) {
+function uci_export_data() {
+    if (!isset($_POST['uci_export_nonce_field']) || !wp_verify_nonce($_POST['uci_export_nonce_field'], 'uci_export_nonce')) {
+        wp_send_json_error('Nonce verification failed.');
+        return;
+    }
+
+    $format = sanitize_text_field($_POST['export_format']);
+    $selected_columns = isset($_POST['columns']) ? array_map('sanitize_text_field', $_POST['columns']) : array();
+
+    // Check if at least one column is selected
+    if (empty($selected_columns)) {
+        wp_send_json_error('Please select at least one column to export.');
+        return;
+    }
+
     global $wpdb;
     $table_name = $wpdb->prefix . 'udemy_courses';
-    $columns_list = implode(',', $columns);
+    $columns_list = implode(',', $selected_columns);
     // Fetch the data from the database
     $courses = $wpdb->get_results("SELECT $columns_list FROM $table_name", ARRAY_A);
 
     // Check if there are any courses to export
     if (empty($courses)) {
-        echo '<div class="notice notice-warning"><p>No courses found to export.</p></div>';
+        wp_send_json_error('No courses found to export.');
         return;
     }
 
@@ -136,7 +154,7 @@ function uci_export_data($format, $columns) {
                 header('Content-Type: text/csv');
                 $output = fopen('php://output', 'w');
                 // Write the column headers
-                fputcsv($output, $columns);
+                fputcsv($output, $selected_columns);
                 // Write the data rows
                 foreach ($courses as $course) {
                     fputcsv($output, $course);
@@ -144,11 +162,10 @@ function uci_export_data($format, $columns) {
                 fclose($output);
                 break;
         }
-        echo '<div class="notice notice-success"><p>Export successful!</p></div>';
+        exit;
     } catch (Exception $e) {
         // Log the error and display a message to the user
         error_log('Export error: ' . $e->getMessage());
-        echo '<div class="notice notice-error"><p>An error occurred during export. Please check the error log for details.</p></div>';
+        wp_send_json_error('An error occurred during export. Please check the error log for details.');
     }
-    exit;
 }
