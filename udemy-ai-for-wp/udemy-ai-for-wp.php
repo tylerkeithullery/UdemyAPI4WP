@@ -78,8 +78,8 @@ function uci_admin_page() {
         uci_update_table();
     }
 
-    if (isset($_POST['generate_csv'])) {
-        uci_generate_csv();
+    if (isset($_POST['export_table'])) {
+        uci_export_table();
     }
 
     // Fetch data from the database
@@ -97,7 +97,13 @@ function uci_admin_page() {
         <h1>Udemy Course Info</h1>
         <form method="post" action="">
             <input type="submit" name="update_table" value="Update Table" class="button button-primary"/>
-            <input type="submit" name="generate_csv" value="Generate CSV" class="button button-secondary"/>
+            <input type="submit" name="export_table" value="Export Table" class="button button-secondary"/>
+            <label for="export_format">Format:</label>
+            <select name="export_format" id="export_format">
+                <option value="csv">CSV</option>
+                <option value="json">JSON</option>
+                <option value="xml">XML</option>
+            </select>
         </form>
         <h2>Courses <em>(Last Updated: <?php echo esc_html($last_updated); ?>)</em></h2>
         <style>
@@ -254,6 +260,16 @@ function uci_update_table() {
     }
 }
 
+function uci_export_table() {
+    if (isset($_POST['export_format']) && $_POST['export_format'] === 'json') {
+        uci_generate_json();
+    } elseif (isset($_POST['export_format']) && $_POST['export_format'] === 'xml') {
+        uci_generate_xml();
+    } else {
+        uci_generate_csv();
+    }
+}
+
 function uci_generate_csv() {
     global $wpdb;
     $table_name = $wpdb->prefix . 'udemy_courses';
@@ -275,6 +291,49 @@ function uci_generate_csv() {
     }
 
     fclose($output);
+    exit;
+}
+
+function uci_generate_json() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'udemy_courses';
+    $courses = $wpdb->get_results("SELECT * FROM $table_name", ARRAY_A);
+
+    if (empty($courses)) {
+        return;
+    }
+
+    $filename = 'udemy_courses_' . date('Ymd') . '.json';
+    header('Content-Type: application/json');
+    header('Content-Disposition: attachment;filename=' . $filename);
+
+    echo json_encode($courses);
+    exit;
+}
+
+function uci_generate_xml() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'udemy_courses';
+    $courses = $wpdb->get_results("SELECT * FROM $table_name", ARRAY_A);
+
+    if (empty($courses)) {
+        return;
+    }
+
+    $filename = 'udemy_courses_' . date('Ymd') . '.xml';
+    header('Content-Type: text/xml');
+    header('Content-Disposition: attachment;filename=' . $filename);
+
+    $xml = new SimpleXMLElement('<courses/>');
+
+    foreach ($courses as $course) {
+        $course_xml = $xml->addChild('course');
+        foreach ($course as $key => $value) {
+            $course_xml->addChild($key, htmlspecialchars($value));
+        }
+    }
+
+    echo $xml->asXML();
     exit;
 }
 
