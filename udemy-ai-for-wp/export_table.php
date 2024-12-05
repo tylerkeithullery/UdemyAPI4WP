@@ -47,10 +47,18 @@ function uci_export_page() {
                 method: 'POST',
                 body: formData
             })
-            .then(response => response.text())
-            .then(data => {
+            .then(response => response.blob())
+            .then(blob => {
                 document.getElementById('loading-indicator').style.display = 'none';
-                document.querySelector('.wrap').insertAdjacentHTML('beforeend', data);
+                var url = window.URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = 'udemy_courses_export';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+                document.querySelector('.wrap').insertAdjacentHTML('beforeend', '<div class="notice notice-success"><p>Export successful!</p></div>');
             })
             .catch(error => {
                 document.getElementById('loading-indicator').style.display = 'none';
