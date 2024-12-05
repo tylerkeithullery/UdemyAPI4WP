@@ -2,9 +2,10 @@
 /*
 Plugin Name: Udemy API for WP
 Plugin URI: https://github.com/tylerkeithullery/UdemyAPI4WP
-Description: A plugin to fetch and display Udemy course information from API.
+Description: A plugin to fetch and display information from Udemy Instructor API.
 Version: 1.0
 Author: Tyler K Ullery
+Author URI: https://github.com/tylerkeithullery
 
 * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
 * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
