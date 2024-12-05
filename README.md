@@ -9,11 +9,11 @@ The Udemy API for WordPress plugin allows you to fetch and display Udemy course 
 - Fetch and display Udemy course information.
 - Store course data in a custom database table.
 - Schedule automatic updates using WordPress cron jobs.
-- Generate CSV files of course data.
+- Generate CSV, JSON, and XML files of course data.
 - Securely store and manage your Udemy API secret token.
+- Debug page to view plugin and server information.
 
 ![image](https://skillxpand.com/wp-content/uploads/2024/12/Screenshot-2024-12-04-5.23.00-PM.png)
-
 
 ## Installation
 
@@ -35,9 +35,11 @@ The Udemy API for WordPress plugin allows you to fetch and display Udemy course 
 2. Click the "Update Table" button to fetch the latest course data from the Udemy API.
 3. The course data will be displayed in a table format, showing details such as Course ID, Title, Headline, Paid status, Published status, Reviews, Published Time, Published Title, Rating, URL, and Created date.
 
-### Generating CSV
+### Generating CSV, JSON, and XML
 
-1. On the "Udemy Course Info" page, click the "Generate CSV" button to download a CSV file containing the course data.
+1. On the "Udemy Course Info" page, click the "Export Table" button to navigate to the export page.
+2. Select the export format (CSV, JSON, or XML) and the columns you want to export.
+3. Click the "Export" button to download the file containing the course data.
 
 ### Automatic Updates
 
@@ -48,12 +50,22 @@ The Udemy API for WordPress plugin allows you to fetch and display Udemy course 
 ### Main Admin Page
 
 - Displays the fetched course data in a table format.
-- Provides buttons to manually update the course data and generate a CSV file.
+- Provides buttons to manually update the course data and navigate to the export page.
 
 ### Setup Page
 
 - Allows you to enter and save your Udemy API secret token.
 - Provides instructions on how to create an API client and obtain the secret token.
+
+### Export Page
+
+- Allows you to select the export format (CSV, JSON, or XML) and the columns to export.
+- Provides a button to download the exported file.
+
+### Debug Page
+
+- Displays plugin and server information useful for debugging.
+- Provides a button to copy the debug information to the clipboard.
 
 ## Disclaimer
 
@@ -61,7 +73,7 @@ This plugin is in no way endorsed by Udemy in any way.
 
 ## Support
 
-For support and further information, please vist [Github](https://github.com/tylerkeithullery/udemyapiwp).
+For support and further information, please visit [Github](https://github.com/tylerkeithullery/udemyapiwp).
 
 ## Contributing
 
