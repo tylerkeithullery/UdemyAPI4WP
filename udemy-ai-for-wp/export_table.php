@@ -47,13 +47,18 @@ function uci_export_page() {
                 method: 'POST',
                 body: formData
             })
-            .then(response => response.blob())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.blob();
+            })
             .then(blob => {
                 document.getElementById('loading-indicator').style.display = 'none';
                 var url = window.URL.createObjectURL(blob);
                 var a = document.createElement('a');
                 a.href = url;
-                a.download = 'udemy_courses_export';
+                a.download = 'udemy_courses_export.' + formData.get('export_format');
                 document.body.appendChild(a);
                 a.click();
                 a.remove();
