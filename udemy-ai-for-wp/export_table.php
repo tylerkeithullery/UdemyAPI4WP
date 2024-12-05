@@ -1,4 +1,5 @@
 <?php
+// Function to render the export page
 function uci_export_page() {
     ?>
     <div class="wrap">
@@ -12,6 +13,7 @@ function uci_export_page() {
             </select>
             <h2>Select Columns to Export</h2>
             <?php
+            // Define the columns available for export
             $columns = array(
                 'course_id' => 'Course ID',
                 'course_title' => 'Title',
@@ -25,6 +27,7 @@ function uci_export_page() {
                 'url' => 'URL',
                 'created' => 'Created'
             );
+            // Display checkboxes for each column
             foreach ($columns as $column => $display_name) {
                 echo "<label><input type='checkbox' name='columns[]' value='$column' checked> $display_name</label><br>";
             }
@@ -33,24 +36,30 @@ function uci_export_page() {
         </form>
     </div>
     <?php
+    // Handle form submission
     if (isset($_POST['export_table'])) {
         $format = sanitize_text_field($_POST['export_format']);
         $selected_columns = isset($_POST['columns']) ? array_map('sanitize_text_field', $_POST['columns']) : array();
 
+        // Check if at least one column is selected
         if (empty($selected_columns)) {
             echo '<div class="notice notice-error"><p>Please select at least one column to export.</p></div>';
         } else {
+            // Call the function to export data
             uci_export_data($format, $selected_columns);
         }
     }
 }
 
+// Function to export data in the selected format
 function uci_export_data($format, $columns) {
     global $wpdb;
     $table_name = $wpdb->prefix . 'udemy_courses';
     $columns_list = implode(',', $columns);
+    // Fetch the data from the database
     $courses = $wpdb->get_results("SELECT $columns_list FROM $table_name", ARRAY_A);
 
+    // Check if there are any courses to export
     if (empty($courses)) {
         echo '<div class="notice notice-warning"><p>No courses found to export.</p></div>';
         return;
@@ -64,6 +73,7 @@ function uci_export_data($format, $columns) {
     flush();
 
     try {
+        // Export data in the selected format
         switch ($format) {
             case 'json':
                 header('Content-Type: application/json');
@@ -84,7 +94,9 @@ function uci_export_data($format, $columns) {
             default:
                 header('Content-Type: text/csv');
                 $output = fopen('php://output', 'w');
+                // Write the column headers
                 fputcsv($output, $columns);
+                // Write the data rows
                 foreach ($courses as $course) {
                     fputcsv($output, $course);
                 }
@@ -92,6 +104,7 @@ function uci_export_data($format, $columns) {
                 break;
         }
     } catch (Exception $e) {
+        // Log the error and display a message to the user
         error_log('Export error: ' . $e->getMessage());
         echo '<div class="notice notice-error"><p>An error occurred during export. Please check the error log for details.</p></div>';
     }
