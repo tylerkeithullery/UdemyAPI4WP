@@ -13,51 +13,6 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
-// Hook to create custom table on plugin activation
-register_activation_hook(__FILE__, 'uci_create_table');
-
-function uci_create_table() {
-    global $wpdb;
-    $table_name = $wpdb->prefix . 'udemy_courses';
-    $charset_collate = $wpdb->get_charset_collate();
-
-    // SQL query to create the custom table
-    $sql = "CREATE TABLE $table_name (
-        id mediumint(9) NOT NULL AUTO_INCREMENT,
-        course_id varchar(255) NOT NULL,
-        course_title text NOT NULL,
-        headline text NOT NULL,
-        is_paid tinyint(1) NOT NULL,
-        is_published tinyint(1) NOT NULL,
-        num_reviews int NOT NULL,
-        published_time datetime NOT NULL,
-        published_title text NOT NULL,
-        rating float NOT NULL,
-        url text NOT NULL,
-        created datetime NOT NULL,
-        last_updated datetime NOT NULL,
-        PRIMARY KEY  (id)
-    ) $charset_collate;";
-
-    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-    dbDelta($sql);
-}
-
-// Schedule the cron job on plugin activation
-register_activation_hook(__FILE__, 'uci_schedule_cron_job');
-function uci_schedule_cron_job() {
-    if (!wp_next_scheduled('uci_update_courses_event')) {
-        wp_schedule_event(time(), 'twicedaily', 'uci_update_courses_event');
-    }
-}
-
-// Clear the cron job on plugin deactivation
-register_deactivation_hook(__FILE__, 'uci_clear_cron_job');
-function uci_clear_cron_job() {
-    $timestamp = wp_next_scheduled('uci_update_courses_event');
-    wp_unschedule_event($timestamp, 'uci_update_courses_event');
-}
-
 // Hook the cron job to the data update function
 add_action('uci_update_courses_event', 'uci_update_table');
 
@@ -329,7 +284,9 @@ function uci_update_table() {
     <?php
 }
 
-// Include the setup and export pages
+// Include Plugin PHP files
 include plugin_dir_path(__FILE__) . 'setup.php';
 include plugin_dir_path(__FILE__) . 'export_table.php';
 include plugin_dir_path(__FILE__) . 'debuguafw.php';
+include plugin_dir_path(__FILE__) . 'on_activate.php';
+include plugin_dir_path(__FILE__) . 'on_deactivate.php';
