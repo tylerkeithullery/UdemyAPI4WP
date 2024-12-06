@@ -290,3 +290,4 @@ include plugin_dir_path(__FILE__) . 'export_table.php';
 include plugin_dir_path(__FILE__) . 'debuguafw.php';
 include plugin_dir_path(__FILE__) . 'on_activate.php';
 include plugin_dir_path(__FILE__) . 'on_deactivate.php';
+include plugin_dir_path(__FILE__) . 'reviews.php';
