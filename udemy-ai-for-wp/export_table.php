@@ -133,7 +133,7 @@ function uci_export_data() {
         return;
     }
 
-    $filename = 'udemy_courses_' . date('Ymd') . '.' . $format;
+    $filename = 'udemy_courses_' . gmdate('Ymd') . '.' . $format;
     header('Content-Disposition: attachment;filename=' . $filename);
 
     // Clear the output buffer to prevent any extra information from being included
