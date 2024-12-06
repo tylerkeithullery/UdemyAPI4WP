@@ -73,24 +73,6 @@ function uci_export_page() {
         });
     </script>
     <?php
-    // Handle form submission
-    if (isset($_POST['export_table'])) {
-        if (!isset($_POST['uci_export_nonce_field']) || !wp_verify_nonce($_POST['uci_export_nonce_field'], 'uci_export_nonce')) {
-            echo '<div class="notice notice-error"><p>Nonce verification failed. Please try again.</p></div>';
-            return;
-        }
-
-        $format = sanitize_text_field($_POST['export_format']);
-        $selected_columns = isset($_POST['columns']) ? array_map('sanitize_text_field', $_POST['columns']) : array();
-
-        // Check if at least one column is selected
-        if (empty($selected_columns)) {
-            echo '<div class="notice notice-error"><p>Please select at least one column to export.</p></div>';
-        } else {
-            // Call the function to export data
-            uci_export_data($format, $selected_columns);
-        }
-    }
 }
 
 // Add action to handle the AJAX request
@@ -122,7 +104,7 @@ function uci_export_data() {
 
     if ($courses === false) {
         // Fetch the data from the database if not cached
-        $courses = $wpdb->get_results("SELECT $columns_list FROM $table_name", ARRAY_A);
+        $courses = $wpdb->get_results("SELECT DISTINCT $columns_list FROM $table_name", ARRAY_A);
         // Cache the data
         wp_cache_set($cache_key, $courses);
     }
@@ -163,7 +145,7 @@ function uci_export_data() {
                 header('Content-Type: text/csv');
                 $output = fopen('php://output', 'w');
                 // Write the column headers
-                fputcsv($output, $selected_columns);
+                fputcsv($output, array_keys($courses[0]));
                 // Write the data rows
                 foreach ($courses as $course) {
                     fputcsv($output, $course);
