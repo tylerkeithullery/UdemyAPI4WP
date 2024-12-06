@@ -1,19 +1,25 @@
 <?php
 
-// Clear the cron job on plugin deactivation
+// Hook to clear the cron job and perform cleanup tasks on plugin deactivation
 add_action('deactivated_plugin', 'uci_clear_cron_job', 10, 2);
 function uci_clear_cron_job($plugin, $network_deactivating) {
     if (plugin_basename(__FILE__) === $plugin) {
+        // Log the function trigger for debugging purposes
         if (function_exists('error_log')) {
             error_log('uci_clear_cron_job function triggered');
         }
+        // Unschedule the cron job
         uci_unschedule_cron_job();
+        // Delete the custom database table
         uci_delete_custom_table();
+        // Delete the secret token option
         uci_delete_secret_token();
     }
 }
 
+// Unschedule the custom cron job if it exists
 function uci_unschedule_cron_job() {
+    // Log the function trigger for debugging purposes
     if (function_exists('error_log')) {
         error_log('uci_unschedule_cron_job function triggered');
     }
@@ -26,7 +32,9 @@ function uci_unschedule_cron_job() {
     }
 }
 
+// Delete the custom database table used by the plugin
 function uci_delete_custom_table() {
+    // Log the function trigger for debugging purposes
     if (function_exists('error_log')) {
         error_log('uci_delete_custom_table function triggered');
     }
@@ -40,7 +48,9 @@ function uci_delete_custom_table() {
     }
 }
 
+// Delete the secret token option from the database
 function uci_delete_secret_token() {
+    // Log the function trigger for debugging purposes
     if (function_exists('error_log')) {
         error_log('uci_delete_secret_token function triggered');
     }
