@@ -3,13 +3,15 @@
 function uci_setup_page() {
     if (isset($_POST['save_token'])) {
         // Verify nonce
-        if (!isset($_POST['uci_nonce']) || !wp_verify_nonce($_POST['uci_nonce'], 'uci_save_token')) {
+        if (!isset($_POST['uci_nonce']) || !wp_verify_nonce(wp_unslash($_POST['uci_nonce']), 'uci_save_token')) {
             die('Nonce verification failed');
         }
 
         // Sanitize and save the token
-        update_option('udemy_secret_token', sanitize_text_field($_POST['udemy_secret_token']));
-        echo '<div class="notice notice-success"><p>Secret token saved successfully.</p></div>';
+        if (isset($_POST['udemy_secret_token'])) {
+            update_option('udemy_secret_token', sanitize_text_field(wp_unslash($_POST['udemy_secret_token'])));
+            echo '<div class="notice notice-success"><p>Secret token saved successfully.</p></div>';
+        }
         
         // Remove the redirected query parameter after saving the token
         $url = remove_query_arg('redirected');

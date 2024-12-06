@@ -6,6 +6,8 @@ Description: A plugin to fetch and display information from Udemy Instructor API
 Version: 1.0
 Author: Tyler K Ullery
 Author URI: https://github.com/tylerkeithullery
+License: GPLv2
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
 * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -82,24 +84,37 @@ function uci_admin_page() {
     }
 
     // Handle form submissions
-    if (isset($_POST['update_table'])) {
+    if (isset($_POST['update_table']) && check_admin_referer('uci_update_table_nonce')) {
         uci_update_table();
     }
 
-    // Fetch data from the database
+    // Fetch data from the database with caching
     global $wpdb;
     $table_name = $wpdb->prefix . 'udemy_courses';
 
-    $orderby = isset($_GET['orderby']) ? sanitize_text_field($_GET['orderby']) : 'last_updated';
-    $order = isset($_GET['order']) ? sanitize_text_field($_GET['order']) : 'DESC';
+    $orderby = isset($_GET['orderby']) ? sanitize_text_field(wp_unslash($_GET['orderby'])) : 'last_updated';
+    $order = isset($_GET['order']) ? sanitize_text_field(wp_unslash($_GET['order'])) : 'DESC';
 
-    $courses = $wpdb->get_results("SELECT * FROM $table_name ORDER BY $orderby $order");
-    $last_updated = $wpdb->get_var("SELECT MAX(last_updated) FROM $table_name");
+    $cache_key_courses = 'uci_courses_' . $orderby . '_' . $order;
+    $cache_key_last_updated = 'uci_last_updated';
+
+    $courses = wp_cache_get($cache_key_courses);
+    if ($courses === false) {
+        $courses = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name ORDER BY %s %s", $orderby, $order));
+        wp_cache_set($cache_key_courses, $courses);
+    }
+
+    $last_updated = wp_cache_get($cache_key_last_updated);
+    if ($last_updated === false) {
+        $last_updated = $wpdb->get_var($wpdb->prepare("SELECT MAX(last_updated) FROM %s", $table_name));
+        wp_cache_set($cache_key_last_updated, $last_updated);
+    }
 
     ?>
     <div class="wrap">
         <h1>Udemy Course Info</h1>
         <form method="post" action="" id="uci-export-form">
+            <?php wp_nonce_field('uci_update_table_nonce'); ?>
             <input type="submit" name="update_table" value="Update Table" class="button button-primary"/>
             <input type="button" id="uci-export-button" value="Export Table" class="button button-secondary"/>
             <span id="api-quota-counter" title="Udemy API quota: 100 requests per 10 seconds. Requests beyond this will return 429's until the rate falls below the throttle threshold.">
@@ -150,7 +165,7 @@ function uci_admin_page() {
                     foreach ($columns as $column => $display_name) {
                         $sort_order = ($orderby === $column && $order === 'ASC') ? 'DESC' : 'ASC';
                         $sort_icon = ($orderby === $column) ? ($order === 'ASC' ? '↑' : '↓') : '';
-                        echo "<th><a href='?page=udemy-course-info&orderby=$column&order=$sort_order'>$display_name $sort_icon</a></th>";
+                        echo '<th><a href="' . esc_url(add_query_arg(array('orderby' => $column, 'order' => $sort_order), admin_url('admin.php?page=udemy-course-info'))) . '">' . esc_html($display_name) . ' ' . esc_html($sort_icon) . '</a></th>';
                     }
                     ?>
                 </tr>
@@ -182,7 +197,7 @@ function uci_admin_page() {
     </div>
     <script>
         document.getElementById('uci-export-button').addEventListener('click', function() {
-            window.location.href = '<?php echo admin_url('admin.php?page=udemy-course-info-export'); ?>';
+            window.location.href = '<?php echo esc_url(admin_url('admin.php?page=udemy-course-info-export')); ?>';
         });
 
         // Example quota value, replace with actual value from API response
@@ -215,6 +230,9 @@ function uci_update_table() {
         )
     ));
 
+    // Extract remaining requests from headers
+    $remaining_requests = wp_remote_retrieve_header($response, 'x-ratelimit-remaining');
+
     if (is_wp_error($response)) {
         update_option('udemy_last_api_error', $response->get_error_message());
         echo '<div class="notice notice-error"><p>Failed to connect to Udemy API. Please try again later.</p></div>';
@@ -233,7 +251,7 @@ function uci_update_table() {
             $table_name = $wpdb->prefix . 'udemy_courses';
 
             // Clear existing data
-            $wpdb->query("TRUNCATE TABLE $table_name");
+            $wpdb->query($wpdb->prepare("TRUNCATE TABLE %s", $table_name));
 
             $current_time = current_time('mysql');
 
@@ -255,6 +273,10 @@ function uci_update_table() {
                     'last_updated' => $current_time
                 ));
             }
+
+            // Clear cache after updating the table
+            wp_cache_delete('uci_courses_' . $orderby . '_' . $order);
+            wp_cache_delete('uci_last_updated');
 
             update_option('udemy_manual_update', $current_time);
             echo '<div class="notice notice-success"><p>Table updated successfully.</p></div>';
@@ -289,6 +311,22 @@ function uci_update_table() {
         update_option('udemy_last_api_error', $error_message);
         echo '<div class="notice notice-error"><p>' . esc_html($error_message) . '</p></div>';
     }
+    ?>
+    <script>
+        // Example quota value, replace with actual value from API response
+        var remainingRequests = <?php echo esc_js($remaining_requests); ?>; // This should be dynamically set based on actual API response
+        var quotaCounter = document.getElementById('api-quota-counter');
+        var quotaThreshold = 20; // Threshold for low quota
+
+        if (remainingRequests <= quotaThreshold) {
+            quotaCounter.classList.add('low');
+        } else {
+            quotaCounter.classList.add('good');
+        }
+
+        quotaCounter.querySelector('strong').textContent = remainingRequests;
+    </script>
+    <?php
 }
 
 // Include the setup and export pages

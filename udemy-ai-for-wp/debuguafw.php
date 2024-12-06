@@ -4,21 +4,52 @@ function uci_debug_page() {
         return;
     }
 
-    if (isset($_POST['uci_debug_nonce']) && !wp_verify_nonce($_POST['uci_debug_nonce'], 'uci_debug_nonce')) {
+    if (isset($_POST['uci_debug_nonce']) && !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['uci_debug_nonce'])), 'uci_debug_nonce')) {
         return;
     }
 
     global $wpdb;
-    $courses_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}udemy_courses");
-    $last_updated = $wpdb->get_var("SELECT MAX(last_updated) FROM {$wpdb->prefix}udemy_courses");
+    
+    // Cache key for courses count
+    $courses_count_cache_key = 'uci_courses_count';
+    $courses_count = wp_cache_get($courses_count_cache_key);
+    if ($courses_count === false) {
+        $courses_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}udemy_courses");
+        wp_cache_set($courses_count_cache_key, $courses_count, '', 3600); // Cache for 1 hour
+    }
+
+    // Cache key for last updated
+    $last_updated_cache_key = 'uci_last_updated';
+    $last_updated = wp_cache_get($last_updated_cache_key);
+    if ($last_updated === false) {
+        $last_updated = $wpdb->get_var("SELECT MAX(last_updated) FROM {$wpdb->prefix}udemy_courses");
+        wp_cache_set($last_updated_cache_key, $last_updated, '', 3600); // Cache for 1 hour
+    }
+
+    // Cache key for last row change
+    $last_row_change_cache_key = 'uci_last_row_change';
+    $last_row_change = wp_cache_get($last_row_change_cache_key);
+    if ($last_row_change === false) {
+        $last_row_change = $wpdb->get_var("SELECT MAX(UPDATE_TIME) FROM information_schema.tables WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '{$wpdb->prefix}udemy_courses'");
+        wp_cache_set($last_row_change_cache_key, $last_row_change, '', 3600); // Cache for 1 hour
+    }
+
     $secret_token = get_option('udemy_secret_token', '');
     $last_api_error = get_option('udemy_last_api_error', 'None');
-    $last_row_change = $wpdb->get_var("SELECT MAX(UPDATE_TIME) FROM information_schema.tables WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '{$wpdb->prefix}udemy_courses'");
     $manual_update = get_option('udemy_manual_update', 'Never');
     $db_valid = $wpdb->check_connection() ? 'Yes' : 'No';
     $active_theme = wp_get_theme();
     $active_plugins = get_option('active_plugins');
-    $server_info = $_SERVER['SERVER_SOFTWARE'];
+    $server_info = isset($_SERVER['SERVER_SOFTWARE']) ? sanitize_text_field(wp_unslash($_SERVER['SERVER_SOFTWARE'])) : 'Unknown';
+
+    if (isset($_POST['export_format']) && isset($_POST['columns'])) {
+        $export_format = sanitize_text_field(wp_unslash($_POST['export_format']));
+        $columns = array_map('sanitize_text_field', wp_unslash($_POST['columns']));
+        $columns_list = implode(', ', $columns);
+        $table_name = $wpdb->prefix . 'udemy_courses';
+        $query = $wpdb->prepare("SELECT $columns_list FROM $table_name WHERE export_format = %s", $export_format);
+        $results = $wpdb->get_results($query);
+    }
 
     ?>
     <div class="wrap">

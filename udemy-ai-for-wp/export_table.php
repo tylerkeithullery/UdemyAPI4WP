@@ -30,7 +30,7 @@ function uci_export_page() {
             );
             // Display checkboxes for each column
             foreach ($columns as $column => $display_name) {
-                echo "<label><input type='checkbox' name='columns[]' value='$column' checked> $display_name</label><br>";
+                echo "<label><input type='checkbox' name='columns[]' value='" . esc_attr($column) . "' checked> " . esc_html($display_name) . "</label><br>";
             }
             ?>
             <input type="submit" name="export_table" value="Export" class="button button-primary"/>
@@ -44,7 +44,7 @@ function uci_export_page() {
             
             var formData = new FormData(this);
             formData.append('action', 'uci_export_data'); // Add action parameter for AJAX request
-            fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
+            fetch('<?php echo esc_url(admin_url('admin-ajax.php')); ?>', {
                 method: 'POST',
                 body: formData
             })
@@ -115,8 +115,17 @@ function uci_export_data() {
     global $wpdb;
     $table_name = $wpdb->prefix . 'udemy_courses';
     $columns_list = implode(',', $selected_columns);
-    // Fetch the data from the database
-    $courses = $wpdb->get_results("SELECT $columns_list FROM $table_name", ARRAY_A);
+
+    // Attempt to get cached data
+    $cache_key = 'udemy_courses_' . md5($columns_list);
+    $courses = wp_cache_get($cache_key);
+
+    if ($courses === false) {
+        // Fetch the data from the database if not cached
+        $courses = $wpdb->get_results("SELECT $columns_list FROM $table_name", ARRAY_A);
+        // Cache the data
+        wp_cache_set($cache_key, $courses);
+    }
 
     // Check if there are any courses to export
     if (empty($courses)) {
