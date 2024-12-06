@@ -23,8 +23,9 @@ function uci_admin_menu() {
     // Add main menu page
     add_menu_page('Udemy Course Info', 'Udemy Course Info', 'manage_options', 'udemy-course-info', 'uci_admin_page');
     // Add submenu pages
-    add_submenu_page('udemy-course-info', 'Setup', 'Setup', 'manage_options', 'udemy-course-info-setup', 'uci_setup_page');
+    add_submenu_page('udemy-course-info', 'Reviews', 'Reviews', 'manage_options', 'udemy-course-info-reviews', 'uci_reviews_page');
     add_submenu_page('udemy-course-info', 'Export', 'Export', 'manage_options', 'udemy-course-info-export', 'uci_export_page');
+    add_submenu_page('udemy-course-info', 'Setup', 'Setup', 'manage_options', 'udemy-course-info-setup', 'uci_setup_page');
     add_submenu_page('udemy-course-info', 'Debug', 'Debug', 'manage_options', 'udemy-course-info-debug', 'uci_debug_page');
 }
 
@@ -282,6 +283,71 @@ function uci_update_table() {
         quotaCounter.querySelector('strong').textContent = remainingRequests;
     </script>
     <?php
+}
+
+function uci_sync_reviews() {
+    $api_url = 'https://www.udemy.com/instructor-api/v1/taught-courses/reviews?fields[course_review]=content,course,created,rating,response';
+    $secret_token = get_option('udemy_secret_token', '');
+
+    if (empty($secret_token)) {
+        echo '<div class="notice notice-error"><p>Please set your Udemy secret token in the setup page.</p></div>';
+        return;
+    }
+
+    $reviews = [];
+    $page = 1;
+
+    do {
+        $response = wp_remote_get($api_url . '&page=' . $page, array(
+            'headers' => array(
+                'Authorization' => 'Bearer ' . $secret_token
+            )
+        ));
+
+        if (is_wp_error($response)) {
+            update_option('udemy_last_api_error', $response->get_error_message());
+            echo '<div class="notice notice-error"><p>Failed to connect to Udemy API. Please try again later.</p></div>';
+            return;
+        }
+
+        $response_code = wp_remote_retrieve_response_code($response);
+        $response_body = wp_remote_retrieve_body($response);
+
+        if ($response_code >= 200 && $response_code < 300) {
+            $data = json_decode($response_body, true);
+            if (!empty($data['results'])) {
+                $reviews = array_merge($reviews, $data['results']);
+            }
+            $page++;
+        } else {
+            break;
+        }
+    } while (!empty($data['results']));
+
+    if (!empty($reviews)) {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'udemy_reviews';
+
+        // Clear existing data
+        $wpdb->query("TRUNCATE TABLE $table_name");
+
+        foreach ($reviews as $review) {
+            $course_id = $review['course']['id'];
+            $course_title = $review['course']['title'];
+            $wpdb->insert($table_name, array(
+                'course_id' => $course_id,
+                'course_title' => $course_title,
+                'content' => $review['content'],
+                'rating' => $review['rating'],
+                'created' => $review['created'],
+                'response' => $review['response']
+            ));
+        }
+
+        echo '<div class="notice notice-success"><p>Reviews synced successfully.</p></div>';
+    } else {
+        echo '<div class="notice notice-warning"><p>No reviews found in the Udemy API response.</p></div>';
+    }
 }
 
 // Include Plugin PHP files

@@ -34,6 +34,22 @@ function uci_debug_page() {
         wp_cache_set($last_row_change_cache_key, $last_row_change, '', 3600); // Cache for 1 hour
     }
 
+    // Cache key for reviews count
+    $reviews_count_cache_key = 'uci_reviews_count';
+    $reviews_count = wp_cache_get($reviews_count_cache_key);
+    if ($reviews_count === false) {
+        $reviews_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}udemy_reviews");
+        wp_cache_set($reviews_count_cache_key, $reviews_count, '', 3600); // Cache for 1 hour
+    }
+
+    // Cache key for last review date
+    $last_review_date_cache_key = 'uci_last_review_date';
+    $last_review_date = wp_cache_get($last_review_date_cache_key);
+    if ($last_review_date === false) {
+        $last_review_date = $wpdb->get_var("SELECT MAX(created) FROM {$wpdb->prefix}udemy_reviews");
+        wp_cache_set($last_review_date_cache_key, $last_review_date, '', 3600); // Cache for 1 hour
+    }
+
     $secret_token = get_option('udemy_secret_token', '');
     $last_api_error = get_option('udemy_last_api_error', 'None');
     $manual_update = get_option('udemy_manual_update', 'Never');
@@ -68,8 +84,9 @@ function uci_debug_page() {
             echo "Number of Courses: " . esc_html($courses_count) . "\n";
             echo "Last Updated: " . esc_html($last_updated) . "\n";
             echo "Secret Token Set: " . esc_html(!empty($secret_token) ? 'Yes' : 'No') . "\n";
+            echo "Number of Reviews: " . esc_html($reviews_count) . "\n";
+            echo "Last Review Date: " . esc_html($last_review_date) . "\n";
             echo "Last API Error: " . esc_html($last_api_error) . "\n";
-            echo "Last Row/Table Change: " . esc_html($last_row_change) . "\n";
             echo "Manual Update: " . esc_html($manual_update) . "\n";
             echo "Valid Database: " . esc_html($db_valid) . "\n";
             echo "Active Theme: " . esc_html($active_theme->get('Name')) . " (Version: " . esc_html($active_theme->get('Version')) . ")\n";
@@ -78,6 +95,7 @@ function uci_debug_page() {
                 echo "- " . esc_html($plugin) . "\n";
             }
             echo "Server Information: " . esc_html($server_info) . "\n";
+    
             ?>
             </textarea>
             <br>
