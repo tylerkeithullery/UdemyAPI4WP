@@ -251,7 +251,7 @@ function uci_update_table() {
             $table_name = $wpdb->prefix . 'udemy_courses';
 
             // Clear existing data
-            $wpdb->query($wpdb->prepare("TRUNCATE TABLE %s", $table_name));
+            $wpdb->query("TRUNCATE TABLE $table_name");
 
             $current_time = current_time('mysql');
 

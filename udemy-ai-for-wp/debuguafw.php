@@ -42,6 +42,10 @@ function uci_debug_page() {
     $active_plugins = get_option('active_plugins');
     $server_info = isset($_SERVER['SERVER_SOFTWARE']) ? sanitize_text_field(wp_unslash($_SERVER['SERVER_SOFTWARE'])) : 'Unknown';
 
+    // Fetch row count after truncate and insert from options
+    $row_count_after_truncate = 'N/A';
+    $row_count_after_insert = 'N/A';
+
     if (isset($_POST['export_format']) && isset($_POST['columns'])) {
         $export_format = sanitize_text_field(wp_unslash($_POST['export_format']));
         $columns = array_map('sanitize_text_field', wp_unslash($_POST['columns']));
