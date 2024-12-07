@@ -21,7 +21,7 @@ add_action('admin_menu', 'uci_admin_menu');
 
 function uci_admin_menu() {
     // Add main menu page
-    add_menu_page('Udemy Course Info', 'Udemy Course Info', 'manage_options', 'udemy-course-info', 'uci_admin_page');
+    add_menu_page('Udemy Instructor API', 'Udemy Instructor API', 'manage_options', 'udemy-course-info', 'uci_admin_page');
     // Add submenu pages
     add_submenu_page('udemy-course-info', 'Reviews', 'Reviews', 'manage_options', 'udemy-course-info-reviews', 'uci_reviews_page');
     add_submenu_page('udemy-course-info', 'Export', 'Export', 'manage_options', 'udemy-course-info-export', 'uci_export_page');
