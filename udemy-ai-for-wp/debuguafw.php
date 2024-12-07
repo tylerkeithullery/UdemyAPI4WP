@@ -82,6 +82,7 @@ function uci_debug_page() {
             echo "Plugin Version: 1.0\n";
             echo "WordPress Version: " . esc_html(get_bloginfo('version')) . "\n";
             echo "PHP Version: " . esc_html(phpversion()) . "\n";
+            echo "Setup Completed: " . esc_html($setup_complete ? 'Yes' : 'No') . "\n";
             echo "Number of Courses: " . esc_html($courses_count) . "\n";
             echo "Last Updated: " . esc_html($last_updated) . "\n";
             echo "Secret Token Set: " . esc_html(!empty($secret_token) ? 'Yes' : 'No') . "\n";
@@ -95,9 +96,7 @@ function uci_debug_page() {
             foreach ($active_plugins as $plugin) {
                 echo "- " . esc_html($plugin) . "\n";
             }
-            echo "Server Information: " . esc_html($server_info) . "\n";
-            echo "Setup Completed: " . esc_html($setup_complete ? 'Yes' : 'No') . "\n";
-    
+            echo "Server Information: " . esc_html($server_info) . "\n";    
             ?>
             </textarea>
             <br>
