@@ -68,7 +68,7 @@ function uci_export_page() {
             })
             .catch(error => {
                 document.getElementById('loading-indicator').style.display = 'none';
-                document.querySelector('.wrap').insertAdjacentHTML('beforeend', `<div class="notice notice-error"><p><?php esc_html_e('An error occurred during export:', 'text-domain'); ?> ${error.message}</p></div>`);
+                document.querySelector('.wrap').insertAdjacentHTML('beforeend', `<div class="notice notice-error"><p><?php esc_html_e('An error occurred during export:', 'text-domain'); ?> ${esc_html(error.message)}</p></div>`);
             });
         });
     </script>

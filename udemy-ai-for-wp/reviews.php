@@ -21,12 +21,18 @@ function uci_reviews_page() {
     // Handle form submissions
     if (isset($_POST['sync_reviews']) && check_admin_referer('uci_sync_reviews_nonce')) {
         uci_sync_reviews();
+        wp_cache_delete('uci_reviews');
     }
 
     // Fetch reviews from the database
     global $wpdb;
     $table_name = $wpdb->prefix . 'udemy_reviews';
-    $reviews = $wpdb->get_results("SELECT * FROM $table_name ORDER BY created DESC");
+    $reviews = wp_cache_get('uci_reviews');
+
+    if ($reviews === false) {
+        $reviews = $wpdb->get_results("SELECT * FROM $table_name ORDER BY created DESC");
+        wp_cache_set('uci_reviews', $reviews);
+    }
 
     ?>
     <div class="wrap">

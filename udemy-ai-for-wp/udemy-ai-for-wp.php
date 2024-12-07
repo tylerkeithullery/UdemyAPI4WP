@@ -62,7 +62,7 @@ function uci_admin_page() {
 
     $last_updated = wp_cache_get($cache_key_last_updated);
     if ($last_updated === false) {
-        $last_updated = $wpdb->get_var($wpdb->prepare("SELECT MAX(last_updated) FROM %s", $table_name));
+        $last_updated = $wpdb->get_var($wpdb->prepare("SELECT MAX(last_updated) FROM $table_name"));
         wp_cache_set($cache_key_last_updated, $last_updated);
     }
 

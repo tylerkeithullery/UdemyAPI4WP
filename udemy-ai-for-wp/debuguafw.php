@@ -14,40 +14,55 @@ function uci_debug_page() {
     $courses_count_cache_key = 'uci_courses_count';
     $courses_count = wp_cache_get($courses_count_cache_key);
     if ($courses_count === false) {
-        $courses_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}udemy_courses");
-        wp_cache_set($courses_count_cache_key, $courses_count, '', 3600); // Cache for 1 hour
+        $courses_count = (int) get_transient($courses_count_cache_key);
+        if ($courses_count === false) {
+            $courses_count = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}udemy_courses");
+            set_transient($courses_count_cache_key, $courses_count, HOUR_IN_SECONDS);
+        }
     }
 
     // Cache key for last updated
     $last_updated_cache_key = 'uci_last_updated';
     $last_updated = wp_cache_get($last_updated_cache_key);
     if ($last_updated === false) {
-        $last_updated = $wpdb->get_var("SELECT MAX(last_updated) FROM {$wpdb->prefix}udemy_courses");
-        wp_cache_set($last_updated_cache_key, $last_updated, '', 3600); // Cache for 1 hour
+        $last_updated = get_transient($last_updated_cache_key);
+        if ($last_updated === false) {
+            $last_updated = $wpdb->get_var("SELECT MAX(last_updated) FROM {$wpdb->prefix}udemy_courses");
+            set_transient($last_updated_cache_key, $last_updated, HOUR_IN_SECONDS);
+        }
     }
 
     // Cache key for last row change
     $last_row_change_cache_key = 'uci_last_row_change';
     $last_row_change = wp_cache_get($last_row_change_cache_key);
     if ($last_row_change === false) {
-        $last_row_change = $wpdb->get_var("SELECT MAX(UPDATE_TIME) FROM information_schema.tables WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '{$wpdb->prefix}udemy_courses'");
-        wp_cache_set($last_row_change_cache_key, $last_row_change, '', 3600); // Cache for 1 hour
+        $last_row_change = get_transient($last_row_change_cache_key);
+        if ($last_row_change === false) {
+            $last_row_change = $wpdb->get_var("SELECT MAX(UPDATE_TIME) FROM information_schema.tables WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '{$wpdb->prefix}udemy_courses'");
+            set_transient($last_row_change_cache_key, $last_row_change, HOUR_IN_SECONDS);
+        }
     }
 
     // Cache key for reviews count
     $reviews_count_cache_key = 'uci_reviews_count';
     $reviews_count = wp_cache_get($reviews_count_cache_key);
     if ($reviews_count === false) {
-        $reviews_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}udemy_reviews");
-        wp_cache_set($reviews_count_cache_key, $reviews_count, '', 3600); // Cache for 1 hour
+        $reviews_count = (int) get_transient($reviews_count_cache_key);
+        if ($reviews_count === false) {
+            $reviews_count = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}udemy_reviews");
+            set_transient($reviews_count_cache_key, $reviews_count, HOUR_IN_SECONDS);
+        }
     }
 
     // Cache key for last review date
     $last_review_date_cache_key = 'uci_last_review_date';
     $last_review_date = wp_cache_get($last_review_date_cache_key);
     if ($last_review_date === false) {
-        $last_review_date = $wpdb->get_var("SELECT MAX(created) FROM {$wpdb->prefix}udemy_reviews");
-        wp_cache_set($last_review_date_cache_key, $last_review_date, '', 3600); // Cache for 1 hour
+        $last_review_date = get_transient($last_review_date_cache_key);
+        if ($last_review_date === false) {
+            $last_review_date = $wpdb->get_var("SELECT MAX(created) FROM {$wpdb->prefix}udemy_reviews");
+            set_transient($last_review_date_cache_key, $last_review_date, HOUR_IN_SECONDS);
+        }
     }
 
     $secret_token = get_option('udemy_secret_token', '');
