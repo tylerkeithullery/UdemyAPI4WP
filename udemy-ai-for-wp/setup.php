@@ -24,7 +24,7 @@ function uci_setup_page() {
 
     ?>
     <div class="wrap">
-        <h1>Udemy Course Info Setup</h1>
+        <h1>Setup</h1>
         <?php if (isset($_GET['redirected']) && $_GET['redirected'] == 'true') : ?>
             <script type="text/javascript">
                 document.addEventListener('DOMContentLoaded', function() {
