@@ -57,6 +57,7 @@ function uci_debug_page() {
     $active_theme = wp_get_theme();
     $active_plugins = get_option('active_plugins');
     $server_info = isset($_SERVER['SERVER_SOFTWARE']) ? sanitize_text_field(wp_unslash($_SERVER['SERVER_SOFTWARE'])) : 'Unknown';
+    $setup_complete = get_option('uci_setup_complete', false);
 
     // Fetch row count after truncate and insert from options
     $row_count_after_truncate = 'N/A';
@@ -95,6 +96,7 @@ function uci_debug_page() {
                 echo "- " . esc_html($plugin) . "\n";
             }
             echo "Server Information: " . esc_html($server_info) . "\n";
+            echo "Setup Completed: " . esc_html($setup_complete ? 'Yes' : 'No') . "\n";
     
             ?>
             </textarea>

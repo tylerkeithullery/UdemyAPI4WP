@@ -10,6 +10,7 @@ function uci_setup_page() {
         // Sanitize and save the token
         if (isset($_POST['udemy_secret_token'])) {
             update_option('udemy_secret_token', sanitize_text_field(wp_unslash($_POST['udemy_secret_token'])));
+            update_option('uci_setup_complete', true); // Mark setup as complete
             echo '<div class="notice notice-success"><p>Secret token saved successfully.</p></div>';
         }
         
