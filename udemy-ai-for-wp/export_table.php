@@ -3,16 +3,16 @@
 function uci_export_page() {
     ?>
     <div class="wrap">
-        <h1>Export Udemy Courses</h1>
+        <h1><?php esc_html_e('Export Udemy Courses', 'text-domain'); ?></h1>
         <form method="post" action="" id="export-form">
             <?php wp_nonce_field('uci_export_nonce', 'uci_export_nonce_field'); ?>
-            <h2>Select Export Format</h2>
+            <h2><?php esc_html_e('Select Export Format', 'text-domain'); ?></h2>
             <select name="export_format">
-                <option value="csv">CSV</option>
-                <option value="json">JSON</option>
-                <option value="xml">XML</option>
+                <option value="csv"><?php esc_html_e('CSV', 'text-domain'); ?></option>
+                <option value="json"><?php esc_html_e('JSON', 'text-domain'); ?></option>
+                <option value="xml"><?php esc_html_e('XML', 'text-domain'); ?></option>
             </select>
-            <h2>Select Columns to Export</h2>
+            <h2><?php esc_html_e('Select Columns to Export', 'text-domain'); ?></h2>
             <?php
             // Define the columns available for export
             $columns = array(
@@ -33,8 +33,8 @@ function uci_export_page() {
                 echo "<label><input type='checkbox' name='columns[]' value='" . esc_attr($column) . "' checked> " . esc_html($display_name) . "</label><br>";
             }
             ?>
-            <input type="submit" name="export_table" value="Export" class="button button-primary"/>
-            <div id="loading-indicator" style="display:none;">Exporting, please wait...</div>
+            <input type="submit" name="export_table" value="<?php esc_attr_e('Export', 'text-domain'); ?>" class="button button-primary"/>
+            <div id="loading-indicator" style="display:none;"><?php esc_html_e('Exporting, please wait...', 'text-domain'); ?></div>
         </form>
     </div>
     <script type="text/javascript">
@@ -64,11 +64,11 @@ function uci_export_page() {
                 a.click();
                 a.remove();
                 window.URL.revokeObjectURL(url);
-                document.querySelector('.wrap').insertAdjacentHTML('beforeend', '<div class="notice notice-success"><p>Export successful!</p></div>');
+                document.querySelector('.wrap').insertAdjacentHTML('beforeend', '<div class="notice notice-success"><p><?php esc_html_e('Export successful!', 'text-domain'); ?></p></div>');
             })
             .catch(error => {
                 document.getElementById('loading-indicator').style.display = 'none';
-                document.querySelector('.wrap').insertAdjacentHTML('beforeend', `<div class="notice notice-error"><p>An error occurred during export: ${error.message}</p></div>`);
+                document.querySelector('.wrap').insertAdjacentHTML('beforeend', `<div class="notice notice-error"><p><?php esc_html_e('An error occurred during export:', 'text-domain'); ?> ${error.message}</p></div>`);
             });
         });
     </script>
@@ -127,7 +127,7 @@ function uci_export_data() {
         switch ($format) {
             case 'json':
                 header('Content-Type: application/json');
-                echo json_encode($courses);
+                echo wp_json_encode($courses);
                 break;
             case 'xml':
                 header('Content-Type: text/xml');
@@ -135,7 +135,7 @@ function uci_export_data() {
                 foreach ($courses as $course) {
                     $course_xml = $xml->addChild('course');
                     foreach ($course as $key => $value) {
-                        $course_xml->addChild($key, htmlspecialchars($value));
+                        $course_xml->addChild($key, esc_html($value));
                     }
                 }
                 echo $xml->asXML();
@@ -145,10 +145,10 @@ function uci_export_data() {
                 header('Content-Type: text/csv');
                 $output = fopen('php://output', 'w');
                 // Write the column headers
-                fputcsv($output, array_keys($courses[0]));
+                fputcsv($output, array_map('esc_html', array_keys($courses[0])));
                 // Write the data rows
                 foreach ($courses as $course) {
-                    fputcsv($output, $course);
+                    fputcsv($output, array_map('esc_html', $course));
                 }
                 fclose($output);
                 break;
@@ -157,6 +157,6 @@ function uci_export_data() {
     } catch (Exception $e) {
         // Log the error and display a message to the user
         error_log('Export error: ' . $e->getMessage());
-        wp_send_json_error('An error occurred during export: ' . $e->getMessage());
+        wp_send_json_error('An error occurred during export: ' . esc_html($e->getMessage()));
     }
 }
