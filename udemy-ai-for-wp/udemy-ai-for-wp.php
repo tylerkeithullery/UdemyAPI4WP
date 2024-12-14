@@ -16,6 +16,11 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 // Hook the cron job to the data update function
 add_action('uci_update_courses_event', 'uci_update_table');
 
+// Schedule the cron job if not already scheduled
+if (!wp_next_scheduled('uci_update_courses_event')) {
+    wp_schedule_event(time(), 'hourly', 'uci_update_courses_event');
+}
+
 // Add admin menu
 add_action('admin_menu', 'uci_admin_menu');
 
@@ -235,6 +240,7 @@ function uci_update_table() {
             wp_cache_delete('uci_last_updated');
 
             update_option('udemy_manual_update', $current_time);
+            update_option('udemy_last_updated', $current_time); // Ensure last_updated is set
             echo '<div class="notice notice-success"><p>Table updated successfully.</p></div>';
         } else {
             echo '<div class="notice notice-warning"><p>No courses found in the Udemy API response.</p></div>';
