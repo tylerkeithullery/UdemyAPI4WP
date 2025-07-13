@@ -39,7 +39,7 @@ function uci_delete_custom_table() {
         error_log('uci_delete_custom_table function triggered');
     }
     global $wpdb;
-    $table_name = $wpdb->prefix . 'uci_courses';
+    $table_name = $wpdb->prefix . 'udemy_courses';
     $result = $wpdb->query("DROP TABLE IF EXISTS `{$table_name}`");
     if ($result !== false) {
         error_log("Table {$table_name} deleted");
@@ -54,9 +54,9 @@ function uci_delete_secret_token() {
     if (function_exists('error_log')) {
         error_log('uci_delete_secret_token function triggered');
     }
-    if (delete_option('uci_secret_token')) {
-        error_log('uci_secret_token deleted');
+    if (delete_option('udemy_secret_token')) {
+        error_log('udemy_secret_token deleted');
     } else {
-        error_log('uci_secret_token not found');
+        error_log('udemy_secret_token not found');
     }
 }
