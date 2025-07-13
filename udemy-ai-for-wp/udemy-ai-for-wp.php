@@ -235,8 +235,8 @@ function uci_update_table() {
                 ));
             }
 
-            // Clear cache after updating the table
-            wp_cache_delete('uci_courses_' . $orderby . '_' . $order);
+            // Clear cached course data after updating
+            wp_cache_flush();
             wp_cache_delete('uci_last_updated');
 
             update_option('udemy_manual_update', $current_time);
