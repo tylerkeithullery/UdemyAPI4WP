@@ -73,7 +73,7 @@ This plugin is in no way endorsed by Udemy in any way.
 
 ## Support
 
-For support and further information, please visit [Github](https://github.com/tylerkeithullery/udemyapiwp).
+For support and further information, please visit [GitHub](https://github.com/tylerkeithullery/udemyapiwp).
 
 ## Contributing
 
